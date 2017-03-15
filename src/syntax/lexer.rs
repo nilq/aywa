@@ -186,7 +186,6 @@ impl Lexer {
                 self.skip_whitespace(line);
 
                 let chr  = self.look(line, 0);
-                let peek = self.look(line, 1);
 
                 if chr == '"' || chr == '\'' {
                     let del = chr;

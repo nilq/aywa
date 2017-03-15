@@ -21,7 +21,9 @@ fn main() {
         lexer.tokenize(buffer);
 
         for n in lexer.get_tokens() {
-            println!("found: {:?}", n.token_type)
+            println!("found: {:?}({:?})", n.token_type, n.content)
         }
+
+        std::process::exit(0)
     }
 }
