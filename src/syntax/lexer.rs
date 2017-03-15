@@ -114,10 +114,7 @@ impl Lexer {
 
         while offset > 0 && !is_bin_op {
             match Lexer::bin_op(&line[self.start .. self.pos + offset]) {
-                Some(_) => {
-                    is_bin_op = true
-                }
-
+                Some(_) => is_bin_op = true,
                 None => ()
             }
             offset -= 1;
@@ -222,10 +219,12 @@ impl Lexer {
                     continue
                 }
 
+                let peek = self.look(line, 1);
+
                 if chr.is_digit(10) ||
                    chr == '.' && peek.is_digit(10) ||
-                   chr == '-' && peek.is_digit(10) 
-                {
+                   chr == '-' && peek.is_digit(10) {
+
                     if chr == '-' {
                         self.pos += 1;
                     }
@@ -234,36 +233,16 @@ impl Lexer {
                         self.pos += 1;
                     }
 
-                    let chr  = self.look(line, 0);
-                    let peek = self.look(line, 1);
-                    
-                    if chr.is_digit(10) ||
-                       chr == '.' && peek.is_digit(10) ||
-                       chr == '-' && peek.is_digit(10)
-                    {
-                        if chr == '-' {
-                            self.pos += 1;
-                        }
-
+                    if self.look(line, 0) == '.' && self.look(line, 1).is_digit(10) {
+                        self.pos += 1;
                         while self.look(line, 0).is_digit(10) {
                             self.pos += 1;
                         }
-
-                        if self.look(line, 0) == '.' && self.look(line, 1).is_digit(10) {
-                            self.pos += 1;
-
-                            while self.look(line, 0).is_digit(10) {
-                                self.pos += 1;
-                            }
-
-                            self.push_token(TokenType::Float, line);
-
-                            continue
-                        }
-
-                        self.push_token(TokenType::Integer, line);
-                        continue
+                        self.push_token(TokenType::Float, line);
+                        continue;
                     }
+                    self.push_token(TokenType::Integer, line);
+                    continue;
                 }
 
                 if self.is_bin_op(line) {
