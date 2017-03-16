@@ -4,7 +4,7 @@ use std::env;
 use std::fs::File;
 use std::io::prelude::*;
 
-pub mod syntax;
+use kravl_parser::syntax;
 
 fn main() {
     let mut lexer = syntax::lexer::Lexer::new();    
