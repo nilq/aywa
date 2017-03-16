@@ -27,7 +27,7 @@ impl Lexer {
         }
     }
 
-    pub fn new_from(tokens: Vec<Token>) -> Lexer {
+    pub fn from(tokens: Vec<Token>) -> Lexer {
         Lexer {
             tokens: tokens,
             lines:  0,
@@ -101,6 +101,8 @@ impl Lexer {
             "true"   => Some(TokenType::True),
             "false"  => Some(TokenType::False),
             "->"     => Some(TokenType::Arrow),
+            "do"     => Some(TokenType::Do),
+            "end"    => Some(TokenType::End),
             _        => None
         }
     }
@@ -174,8 +176,8 @@ impl Lexer {
 
         fn identifier_valid(c: char) -> bool {
             c.is_alphabetic() || c == '_' 
-                            || c == '?'
-                            || c == '!'
+                              || c == '?'
+                              || c == '!'
         }
 
         for line in source.lines() {

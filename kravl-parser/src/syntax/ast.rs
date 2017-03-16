@@ -1,5 +1,6 @@
 use syntax::tokens::{
     TokenType,
+    Token,
     BinOp,
 };
 
@@ -53,6 +54,12 @@ impl Parser {
         Parser {
             lexer: lexer,
         }
+    }
+
+    pub fn parse_from_tokens(tokens: Vec<Token>) -> Result<Vec<Statement>, String> {
+        let mut parser = Parser::from(Lexer::from(tokens));
+
+        parser.parse_full()
     }
 
     fn parse_bin_op(&mut self, expr: Expression) -> Result<Expression, String> {
@@ -139,6 +146,24 @@ impl Parser {
                 Ok(Expression::Bool(false))
             },
 
+            TokenType::LParen => {
+                self.lexer.next_token();
+
+                let expr = try!(self.parse_expression());
+
+                try!(self.lexer.match_current_token(TokenType::RParen));
+
+                self.lexer.next_token();
+
+                if self.lexer.current_token().token_type == TokenType::LParen {
+                    return self.parse_caller(expr)
+                }
+
+                self.lexer.previous_token();
+
+                Ok(expr)
+            },
+
             TokenType::Identifier => {
                 let id = Expression::Identifier(self.lexer.current_token_content());
 
@@ -166,6 +191,47 @@ impl Parser {
                 Ok(Expression::Bool(false))
             }
         }
+    }
+
+    fn parse_full(&mut self) -> Result<Vec<Statement>, String> {
+        let mut statement_stack = Vec::new();
+
+        loop {
+            if self.lexer.tokens_remaining() == 0 {
+                break
+            }
+
+            // TODO: Statement parsing here
+
+            self.lexer.next_token();
+        }
+
+        Ok(statement_stack)
+    }
+
+    fn parse_block(&mut self) -> Result<Vec<Statement>, String> {
+        try!(self.lexer.match_current_token(TokenType::Do));
+
+        let mut block_tokens = Vec::new();
+        let mut opened_dos   = 1;
+
+        while self.lexer.next_token() {
+            if self.lexer.current_token().token_type == TokenType::Do {
+                opened_dos += 1;     
+            } else if self.lexer.current_token().token_type == TokenType::End {
+                opened_dos -= 1;     
+            }
+
+            if opened_dos == 0 {
+                break
+            }
+
+            block_tokens.push(self.lexer.current_token().clone());
+        }
+
+        try!(self.lexer.match_current_token(TokenType::End));
+
+        Parser::parse_from_tokens(block_tokens)
     }
 
     fn parse_expression(&mut self) -> Result<Expression, String> {
