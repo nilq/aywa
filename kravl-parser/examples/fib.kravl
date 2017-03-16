@@ -1,0 +1,4 @@
+define fib(x) -> int
+    if x < 3
+        x
+    fib(x - 1) + fib(x - 2)

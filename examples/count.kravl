@@ -1,6 +1,0 @@
-define count(x) -> int
-    println "almost now"
-    if x
-        count x - 1
-
-count(10)
