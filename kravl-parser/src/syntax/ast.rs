@@ -29,7 +29,7 @@ pub enum Expression {
     Float(f64),
     Text(String),
     Bool(bool),
-    Call(String, Box<Vec<Expression>>),
+    Call(Box<Expression>, Box<Vec<Expression>>),
     Assignment(Box<Expression>, Box<Expression>),
     Dot(Box<Expression>, Box<Expression>),
     Index(String, Box<Expression>),
@@ -147,6 +147,11 @@ impl Parser {
                         TokenType::BinOp => {
                             self.parse_bin_op(id)
                         },
+                        
+                        TokenType::LParen => {
+                            self.parse_caller(id)
+                        },
+                        
                         _ => {
                             self.lexer.previous_token();
                             Ok(id)
@@ -177,5 +182,24 @@ impl Parser {
         }
 
         Ok(expr)
+    }
+
+    // Invoked when LParen is popped
+    fn parse_caller(&mut self, callee: Expression) -> Result<Expression, String> {
+        let mut stack = Vec::new();
+
+        self.lexer.next_token();
+
+        while self.lexer.current_token().token_type != TokenType::RParen {
+            stack.push(try!(self.parse_expression()));
+            
+            self.lexer.next_token();
+
+            if self.lexer.current_token().token_type == TokenType::Comma {
+                self.lexer.next_token();
+            }
+        }
+
+        Ok(Expression::Call(Box::new(callee), Box::new(stack)))
     }
 }
