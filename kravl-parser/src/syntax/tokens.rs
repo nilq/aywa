@@ -8,6 +8,7 @@ pub enum TokenType {
     Function,
     Lambda,
     Return,
+    Arrow,
 
     LParen,
     RParen,

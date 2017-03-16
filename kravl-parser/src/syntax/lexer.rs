@@ -100,6 +100,7 @@ impl Lexer {
             "return" => Some(TokenType::Return),
             "true"   => Some(TokenType::True),
             "false"  => Some(TokenType::False),
+            "->"     => Some(TokenType::Arrow),
             _        => None
         }
     }
