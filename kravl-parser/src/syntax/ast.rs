@@ -29,7 +29,7 @@ pub enum Expression {
     Array(Box<Vec<Expression>>),
     Identifier(String),
     Operation(Box<Expression>, BinOp, Box<Expression>),
-    Definition(Option<String>, Box<Vec<String>>, Box<Vec<Statement>>),
+    Definition(Option<String>, Box<Vec<String>>, Box<Vec<Statement>>, Option<String>),
     Return(Box<Expression>),
 }
 
@@ -222,12 +222,30 @@ impl Parser {
 
                 self.lexer.next_token();
 
+                let ret_type: Option<String>;
+
+                if self.lexer.current_token().token_type == TokenType::Arrow {
+                    self.lexer.next_token();
+
+                    if self.lexer.current_token().token_type == TokenType::Identifier {
+                        ret_type = Some(self.lexer.current_token_content());
+                    } else {
+                        ret_type = None;
+                    }
+
+                } else {
+                    ret_type = None;
+                }
+
+                self.lexer.next_token();
+
                 let block_body = try!(self.parse_block());
 
                 Ok(Expression::Definition(
                     name,
                     Box::new(arg_stack),
                     Box::new(block_body),
+                    ret_type,
                 ))
             },
 
@@ -247,19 +265,53 @@ impl Parser {
 
     fn parse_statement(&mut self) -> Result<Statement, String> {
         match self.lexer.current_token().token_type {
-            TokenType::Assign => {
-                self.lexer.next_token();
-                
-                try!(self.lexer.match_current_token(TokenType::Identifier));
+            TokenType::Identifier => {
+                let id = self.lexer.current_token_content();
 
-                let name = self.lexer.current_token_content();
                 self.lexer.next_token();
-                
-                try!(self.lexer.match_current_token(TokenType::Assign));
+
+                if self.lexer.current_token().token_type != TokenType::Assign {
+                    self.lexer.previous_token();
+
+                    let expr = try!(self.parse_expression());
+
+                    return Ok(Statement::Expression(Box::new(expr)))
+                }
+
                 self.lexer.next_token();
 
                 let expr = try!(self.parse_expression());
-                Ok(Statement::Assignment(name, Box::new(expr)))
+
+                Ok(Statement::Assignment(id, Box::new(expr)))
+            },
+
+            TokenType::If => {
+                self.lexer.next_token();
+
+                let condition = try!(self.parse_expression());
+
+                self.lexer.next_token();
+
+                let body = try!(self.parse_block());
+
+                self.lexer.next_token();
+
+                if self.lexer.current_token().token_type == TokenType::Else {
+                    self.lexer.next_token();
+
+                    let else_body = try!(self.parse_block());
+
+                    return Ok(Statement::IfElse(
+                        Box::new(condition),
+                        Box::new(Statement::Block(Box::new(body))),
+                        Box::new(Statement::Block(Box::new(else_body))),
+                    ))
+                }
+
+                Ok(Statement::If(
+                    Box::new(condition),
+                    Box::new(Statement::Block(Box::new(body))),
+                ))
             },
 
             _ => {

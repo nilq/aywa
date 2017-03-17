@@ -100,7 +100,6 @@ impl Lexer {
             "return" => Some(TokenType::Return),
             "true"   => Some(TokenType::True),
             "false"  => Some(TokenType::False),
-            "->"     => Some(TokenType::Arrow),
             "do"     => Some(TokenType::Do),
             "end"    => Some(TokenType::End),
             _        => None
@@ -245,6 +244,13 @@ impl Lexer {
                     }
                     self.push_token(TokenType::Integer, line);
                     continue;
+                }
+
+                if chr == '-' && self.look(line, 1) == '>'  {
+                    self.push_move(TokenType::Arrow, line);
+                    self.pos += 1;
+
+                    continue
                 }
 
                 if self.is_bin_op(line) {
