@@ -7,13 +7,6 @@ use syntax::tokens::{
 use syntax::lexer::Lexer;
 
 #[derive(Debug, Clone)]
-pub struct Definition {
-    pub name: String,
-    pub args: Vec<String>,
-    pub body: Box<Statement>,
-}
-
-#[derive(Debug, Clone)]
 pub enum Statement {
     If(Box<Expression>, Box<Statement>),
     IfElse(Box<Expression>, Box<Statement>, Box<Statement>),
@@ -37,6 +30,7 @@ pub enum Expression {
     Array(Box<Vec<Expression>>),
     Identifier(String),
     Operation(Box<Expression>, BinOp, Box<Expression>),
+    Definition(Option<String>, Box<Vec<String>>, Box<Vec<Statement>>),
 }
 
 pub struct Parser {
@@ -187,8 +181,57 @@ impl Parser {
                 Ok(id)
             },
 
+            TokenType::Definition => {
+                self.lexer.next_token();
+
+                let name: Option<String>;
+
+                if self.lexer.current_token().token_type == TokenType::Identifier {
+                    name = Some(self.lexer.current_token_content());
+                    self.lexer.next_token();
+                } else {
+                    name = None;
+                }
+
+                try!(self.lexer.match_current_token(TokenType::LParen));
+
+                self.lexer.next_token();
+
+                let mut arg_stack = Vec::new();
+
+                while self.lexer.current_token().token_type == TokenType::Identifier {
+                    arg_stack.push(self.lexer.current_token_content());
+                    
+                    self.lexer.next_token();
+
+                    if self.lexer.current_token().token_type == TokenType::Comma {
+                        self.lexer.next_token();
+                    }
+                }
+
+                try!(self.lexer.match_current_token(TokenType::RParen));
+
+                self.lexer.next_token();
+
+                let block_body = try!(self.parse_block());
+
+                Ok(Expression::Definition(
+                    name,
+                    Box::new(arg_stack),
+                    Box::new(block_body),
+                ))
+            },
+
+            TokenType::Return => {
+                self.lexer.next_token();
+
+                let expr = try!(self.parse_expression());
+
+                Ok(Expression::Return(Box::new(expr)))
+            },
+
             _ => {
-                Ok(Expression::Bool(false))
+                Err(String::from("fucked expression"))
             }
         }
     }

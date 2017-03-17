@@ -5,7 +5,7 @@ pub enum TokenType {
     Text,
     Identifier,
     Assign,
-    Function,
+    Definition,
     Lambda,
     Return,
     Arrow,

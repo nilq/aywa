@@ -93,7 +93,7 @@ impl Lexer {
 
     fn keyword(&mut self, line: &str) -> Option<TokenType> {
         match &line[self.start .. self.pos] {
-            "define" => Some(TokenType::Function),
+            "define" => Some(TokenType::Definition),
             "lambda" => Some(TokenType::Lambda),
             "if"     => Some(TokenType::If),
             "else"   => Some(TokenType::Else),
