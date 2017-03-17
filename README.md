@@ -28,8 +28,10 @@ higher_order(foo)(100)
 
 Lexer
 - escaped characters in strings
+
 Parser
 - lambda definitions
 - argument types `define foo(a -> int, b -> text) ...`
+
 Compiler
 - all of the compiler
