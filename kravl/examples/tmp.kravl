@@ -1,8 +1,4 @@
-define
-lambda
-()
-x
-100
-
-? = 100
-_ = 100
+define foo(a, b) do
+    foo(a + 10, b + 100)
+    return a + b
+end

@@ -31,14 +31,18 @@ mod tests {
         let mut lexer = Lexer::new();
 
         lexer.tokenize(String::from("
-            define fib_sum(a -> int, b -> int) -> int
-                if a + b <= 2
-                    return c
-                end
-                fib_sum(a, b - 1) + fib_sum(a, b - 2)
+            foo = \"hey aywa\"
+            foo = 22.2
+
+            define bar(a, b) do
+                foo = 2
             end
+
+            sum = 1337 - 2 - 10.2 * 100
         "));
 
         let mut parser = Parser::from(lexer);
+
+        let stack = parser.parse_full();
     }
 }

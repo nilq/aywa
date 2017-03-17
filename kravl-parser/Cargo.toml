@@ -1,6 +1,6 @@
 [package]
 name = "kravl-parser"
-version = "0.1.0"
+version = "0.1.4"
 authors = ["nilq <i.am@nilq.dk>"]
 description = "the kravl language - parser module"
 license = "MIT/Apache-2.0"

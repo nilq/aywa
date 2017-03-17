@@ -13,8 +13,7 @@ pub enum Statement {
     Variable(String, Box<Expression>),
     Block(Box<Vec<Statement>>),
     Expression(Box<Expression>),
-    Pass,
-    Return(Box<Expression>),
+    Assignment(String, Box<Expression>),
 }
 
 #[derive(Debug, Clone)]
@@ -31,6 +30,7 @@ pub enum Expression {
     Identifier(String),
     Operation(Box<Expression>, BinOp, Box<Expression>),
     Definition(Option<String>, Box<Vec<String>>, Box<Vec<Statement>>),
+    Return(Box<Expression>),
 }
 
 pub struct Parser {
@@ -60,7 +60,9 @@ impl Parser {
         let mut expr_list = vec!(expr);
         let mut oper_list: Vec<(BinOp, u8)> = Vec::new();
 
-        oper_list.push(Lexer::bin_op(&self.lexer.current_token_content()[..]).unwrap());
+        oper_list.push(Lexer::bin_op(
+            &self.lexer.current_token_content()[..]
+        ).unwrap());
 
         self.lexer.next_token();
 
@@ -70,20 +72,10 @@ impl Parser {
 
         while expr_list.len() > 1 {
 
-            let left = expr_list.pop().unwrap();
-            let right = expr_list.pop().unwrap();
-
-            let oper = Expression::Operation(
-                Box::new(left),
-                oper_list.pop().unwrap().0,
-                Box::new(right),
-            );
-
-
             if !done && self.lexer.next_token() {
                 if self.lexer.current_token().token_type != TokenType::BinOp {
                     self.lexer.previous_token();
-                    done = false;
+                    done = true;
 
                     continue
                 }
@@ -91,7 +83,15 @@ impl Parser {
                 let (op, prec) = Lexer::bin_op(&self.lexer.current_token_content()[..]).unwrap();
 
                 if prec > oper_list.last().unwrap().1 {
-                    expr_list.push(oper);
+
+                    let left = expr_list.pop().unwrap();
+                    let right = expr_list.pop().unwrap();
+
+                    expr_list.push(Expression::Operation(
+                        Box::new(left),
+                        oper_list.pop().unwrap().0,
+                        Box::new(right),
+                    ));
 
                     self.lexer.next_token();
 
@@ -105,6 +105,15 @@ impl Parser {
                 expr_list.push(try!(self.parse_word()));
                 oper_list.push((op, prec));
             }
+
+            let left = expr_list.pop().unwrap();
+            let right = expr_list.pop().unwrap();
+
+            let oper = Expression::Operation(
+                Box::new(left),
+                oper_list.pop().unwrap().0,
+                Box::new(right),
+            );
 
             expr_list.push(oper);
         }
@@ -236,15 +245,39 @@ impl Parser {
         }
     }
 
-    fn parse_full(&mut self) -> Result<Vec<Statement>, String> {
+    fn parse_statement(&mut self) -> Result<Statement, String> {
+        match self.lexer.current_token().token_type {
+            TokenType::Assign => {
+                self.lexer.next_token();
+                
+                try!(self.lexer.match_current_token(TokenType::Identifier));
+
+                let name = self.lexer.current_token_content();
+                self.lexer.next_token();
+                
+                try!(self.lexer.match_current_token(TokenType::Assign));
+                self.lexer.next_token();
+
+                let expr = try!(self.parse_expression());
+                Ok(Statement::Assignment(name, Box::new(expr)))
+            },
+
+            _ => {
+                let expr = try!(self.parse_expression());
+                Ok(Statement::Expression(Box::new(expr)))
+            }
+        }
+    }
+
+    pub fn parse_full(&mut self) -> Result<Vec<Statement>, String> {
         let mut statement_stack = Vec::new();
 
         loop {
-            if self.lexer.tokens_remaining() == 0 {
+            if self.lexer.tokens_remaining() < 1 {
                 break
             }
 
-            // TODO: Statement parsing here
+            statement_stack.push(try!(self.parse_statement()));
 
             self.lexer.next_token();
         }

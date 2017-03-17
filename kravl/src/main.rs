@@ -26,6 +26,14 @@ fn main() {
             println!("found: {:?}({:?})", n.token_type, n.content)
         }
 
+        println!("\n");
+
+        let mut parser = syntax::ast::Parser::from(lexer);
+
+        let stack = parser.parse_full();
+
+        println!("{:?}", stack);
+
         std::process::exit(0)
     }
 }

@@ -81,7 +81,7 @@ impl Lexer {
             "/"  => Some((BinOp::Div, 1)),
             "+"  => Some((BinOp::Plus, 2)),
             "-"  => Some((BinOp::Minus, 2)),
-            "="  => Some((BinOp::Equal, 4)),
+            "=="  => Some((BinOp::Equal, 4)),
             "~=" => Some((BinOp::NotEqual, 4)),
             "<"  => Some((BinOp::Lt, 4)),
             ">"  => Some((BinOp::Gt, 4)),
@@ -162,7 +162,7 @@ impl Lexer {
         match self.current_token().token_type == t {
             true  => Ok(self.current_token()),
             false => Err(format!(
-                "expected '{:?}' but found '{:?}'", t, self.current_token()
+                "expected {:?} but found {:?}", t, self.current_token()
             ))
         }
     }
