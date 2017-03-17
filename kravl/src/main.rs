@@ -32,7 +32,11 @@ fn main() {
 
         let stack = parser.parse_full();
 
-        println!("{:?}", stack);
+        for n in stack {
+            for j in n {
+                println!("{:?}", j)
+            }
+        }
 
         std::process::exit(0)
     }

@@ -1,3 +1,5 @@
-define a() -> integer do
+a = 100 + 10
 
+define a(arg, ar) -> int do
+    return arg + a(ar)
 end

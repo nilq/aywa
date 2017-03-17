@@ -247,9 +247,9 @@ impl Lexer {
                 }
 
                 if chr == '-' && self.look(line, 1) == '>'  {
-                    self.push_move(TokenType::Arrow, line);
-                    self.pos += 1;
-
+                    self.pos += 2;
+                    self.push_token(TokenType::Arrow, line);
+ 
                     continue
                 }
 
