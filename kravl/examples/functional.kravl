@@ -1,5 +1,6 @@
-define higher_order(f x) -> func
+define higher_order(f, x) -> func do
     lambda a: f(x + a)
+end
 
 foo = lambda x: println("yo, ", x)
 
