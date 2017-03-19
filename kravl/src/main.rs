@@ -25,14 +25,8 @@ fn main() {
         source.read_to_string(&mut buffer).unwrap();
 
         lexer.tokenize(buffer);
-
-        for n in lexer.get_tokens() {
-            println!("found: {:?}({:?})", n.token_type, n.content)
-        }
-
-        println!("\n");
-
-        let mut parser = syntax::ast::Parser::from(lexer);
+        
+        let mut parser = syntax::ast::Parser::from(lexer);      
 
         let stack = parser.parse_full();
 
@@ -71,7 +65,6 @@ fn main() {
 
                 Err(e) => panic!(e)
             }
-
         }
     }
 }

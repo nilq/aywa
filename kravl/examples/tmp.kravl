@@ -1,5 +1,7 @@
-a = 100 + 10
-
-define a(arg, ar) -> int do
-    return arg + a(ar)
+define high_foo(a, f) -> definition do
+    return lambda b, c -> i32: f(b, a) * c
 end
+
+sum = lambda a, b -> i32: a * b
+
+println(high_foo(100, sum))

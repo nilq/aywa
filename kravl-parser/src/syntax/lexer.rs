@@ -177,6 +177,7 @@ impl Lexer {
             c.is_alphabetic() || c == '_' 
                               || c == '?'
                               || c == '!'
+                              || c.is_digit(10)
         }
 
         for line in source.lines() {
@@ -207,7 +208,7 @@ impl Lexer {
                     continue
                 }
 
-                if identifier_valid(chr) {
+                if chr.is_alphabetic() {
                     while identifier_valid(self.look(line, 0)) {
                         self.pos += 1;
                     }

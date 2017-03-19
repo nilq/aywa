@@ -30,6 +30,7 @@ pub enum Expression {
     Identifier(String),
     Operation(Box<Expression>, BinOp, Box<Expression>),
     Definition(Option<String>, Box<Vec<String>>, Box<Vec<Statement>>, Option<String>),
+    Lambda(Box<Vec<String>>, Box<Statement>, Option<String>),
     Return(Box<Expression>),
 }
 
@@ -188,6 +189,51 @@ impl Parser {
                 }
 
                 Ok(id)
+            },
+            
+            TokenType::Lambda => {
+                self.lexer.next_token();
+
+                let mut arg_stack = Vec::new();
+
+                while self.lexer.current_token().token_type == TokenType::Identifier {
+                    arg_stack.push(self.lexer.current_token_content());
+                    
+                    self.lexer.next_token();
+
+                    if self.lexer.current_token().token_type == TokenType::Comma {
+                        self.lexer.next_token();
+                    }
+                }
+
+                let ret_type: Option<String>;
+
+                if self.lexer.current_token().token_type == TokenType::Arrow {
+                    self.lexer.next_token();
+
+                    if self.lexer.current_token().token_type == TokenType::Identifier {
+                        ret_type = Some(self.lexer.current_token_content());
+                    } else {
+                        ret_type = None;
+                    }
+
+                } else {
+                    ret_type = None;
+                }
+
+                self.lexer.next_token();
+
+                try!(self.lexer.match_current_token(TokenType::Colon));
+
+                self.lexer.next_token();
+
+                let block_stmt = try!(self.parse_statement());
+
+                Ok(Expression::Lambda(
+                    Box::new(arg_stack),
+                    Box::new(block_stmt),
+                    ret_type,
+                ))
             },
 
             TokenType::Definition => {
