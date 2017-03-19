@@ -1,7 +1,11 @@
+a = 10 + 100
+
 define high_foo(a, f) -> definition do
     return lambda b, c -> i32: f(b, a) * c
 end
 
 sum = lambda a, b -> i32: a * b
 
-println(high_foo(100, sum))
+new_foo = high_foo(100, sum)
+
+println(new_foo(10, 5))
