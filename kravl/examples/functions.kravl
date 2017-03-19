@@ -1,5 +1,0 @@
-define add(a b) -> int
-    a + b
-
-define not_zero?(a) -> bool
-    add(a, 100) > 100

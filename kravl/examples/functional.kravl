@@ -1,7 +1,7 @@
-define higher_order(f, x) -> func do
-    lambda a: f(x + a)
+define higher_order(f: definition, x: i32) -> definition do
+    lambda a -> i32: f(x + a)
 end
 
-foo = lambda x: println("yo, ", x)
+foo = lambda (x -> i32) -> i32: println("yo, ", x)
 
 higher_order(foo)(100)
